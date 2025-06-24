@@ -64,6 +64,12 @@ app.post('/api/auth/login', async (req, res) => {
     }
 })
 
+// Contact Form
+
+app.post("/api/auth/contact", async (req, res) => {
+    
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
