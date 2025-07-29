@@ -2,6 +2,7 @@ import connectDB from '../../lib/mongoose.js'
 import User from '../../models/user.js'
 import { getJWT } from '../../lib/jwt.js'
 
+//TODO: check for same usernames and fail on collision
 export default async function signup(data) {
     await connectDB()
     const newUser = new User(data)

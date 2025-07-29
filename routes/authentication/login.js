@@ -9,15 +9,17 @@ export default async function login(data) {
 
     let user = await User.findOne({ username: data.username }).exec()
     if (user == null || user.length == 0) {
-        console.log('oops')
+        console.log('user NOT found')
         return { ok: false, err: 'user not found' }
     }
 
-    console.log('valid')
-
+    console.log('user found')
+    
     const match = await bcrypt.compare(data.password, user.password)
 
     if (match) {
+        console.log("passwords match")
+
         let token = await getJWT({ id: user._id })
         return {
             ok: true,
@@ -27,5 +29,6 @@ export default async function login(data) {
         }
     }
 
+    console.log("user found, invalid password")
     return { ok: false, err: 'invalid password' }
 }
