@@ -8,6 +8,8 @@ import login from './routes/authentication/login.js'
 
 import cookieParser from 'cookie-parser'
 
+import Joi from 'joi'
+
 import cors from 'cors'
 app.use(
     cors({
@@ -27,7 +29,40 @@ app.get('/', (req, res) => {
 
 // AUTHENTICATION
 app.post('/api/auth/signup', async (req, res) => {
-    let data = await signup(req.body)
+    //
+    const userSchema = Joi.object({
+        name: Joi.object({
+            fname: Joi.string().alphanum().min(1).max(100).trim().required(),
+            lname: Joi.string().alphanum().min(1).max(100).trim().required(),
+        }),
+        username: Joi.string().alphanum().min(1).max(100).trim().required(),
+        email: Joi.string().email().min(1).max(200).trim().required(),
+        password: Joi.string()
+            .min(1)
+            .max(100)
+            .pattern(/^[a-zA-Z0-9!@#$%^&*]+$/)
+            .trim()
+            .required(),
+        isNonProfit: Joi.boolean().required(),
+    })
+
+    const { value: user, error } = userSchema.validate(req.body)
+
+    // return error if form data is not formatted right
+    if (error) {
+        res.status(400).json({
+            ok: false,
+            data: {
+                error,
+            },
+            metadata: {
+                timestamp: Date.now(),
+                endpoint: '/api/auth/signup',
+            },
+        })
+    }
+
+    let data = await signup(user)
 
     let options = {
         maxAge: 3600000, // 1 hr expiry matched with token timer
