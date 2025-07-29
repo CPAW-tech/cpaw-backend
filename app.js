@@ -62,7 +62,7 @@ app.post('/api/auth/signup', async (req, res) => {
         })
     }
 
-    let data = await signup(user)
+    let { ok, data } = await signup(user)
 
     let options = {
         maxAge: 3600000, // 1 hr expiry matched with token timer
@@ -71,17 +71,41 @@ app.post('/api/auth/signup', async (req, res) => {
         secure: true, // force transfer via HTTPS
     }
 
-    if (data.ok) {
-        res.cookie('token', data.token, options)
-
-        res.send({ username: data.username, isNonProfit: data.isNonProfit })
+    if (ok) {
+        res.status(201).cookie('token', data, options)
     } else {
-        res.send(data.err)
+        res.status(500).send({ err: data })
     }
 })
 
 app.post('/api/auth/login', async (req, res) => {
-    let data = await login(req.body)
+    const userSchema = Joi.object({
+        username: Joi.string().alphanum().min(1).max(100).trim().required(),
+        password: Joi.string()
+            .min(1)
+            .max(100)
+            .pattern(/^[a-zA-Z0-9!@#$%^&*]+$/)
+            .trim()
+            .required(),
+    })
+
+    const { value: user, error } = userSchema.validate(req.body)
+
+    // return error if form data is not formatted right
+    if (error) {
+        res.status(400).json({
+            ok: false,
+            data: {
+                error,
+            },
+            metadata: {
+                timestamp: Date.now(),
+                endpoint: '/api/auth/login',
+            },
+        })
+    }
+
+    let { ok, data } = await login(user)
 
     let options = {
         maxAge: 3600000, // 1 hr expiry matched with token timer
@@ -90,12 +114,10 @@ app.post('/api/auth/login', async (req, res) => {
         secure: true, // force transfer via HTTPS
     }
 
-    if (data.ok) {
-        res.cookie('token', data.token, options)
-
-        res.send({ username: data.username, isNonProfit: data.isNonProfit })
+    if (ok) {
+        res.status(200).cookie('token', data, options)
     } else {
-        res.send({ err: data.err })
+        res.status(500).json({ err: data })
     }
 })
 

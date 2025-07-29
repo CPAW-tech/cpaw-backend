@@ -13,22 +13,15 @@ export default async function login(data) {
         return { ok: false, err: 'user not found' }
     }
 
-    console.log('user found')
-    
     const match = await bcrypt.compare(data.password, user.password)
 
     if (match) {
-        console.log("passwords match")
-
         let token = await getJWT({ id: user._id })
         return {
             ok: true,
-            token,
-            username: user.username,
-            isNonProfit: user.isNonProfit,
+            data: token,
         }
     }
 
-    console.log("user found, invalid password")
-    return { ok: false, err: 'invalid password' }
+    return { ok: false, data: 'invalid password' }
 }
