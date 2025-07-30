@@ -7,21 +7,24 @@ import bcrypt from 'bcrypt'
 export default async function login(data) {
     await connectDB()
 
-    let user = await User.findOne({ username: data.username }).exec()
-    if (user == null || user.length == 0) {
-        console.log('user NOT found')
-        return { ok: false, err: 'user not found' }
+    let foundUser = await User.findOne({ username: data.username }).exec()
+    if (!foundUser) {
+        return { ok: false, data: 'Username not found.' }
     }
 
-    const match = await bcrypt.compare(data.password, user.password)
+    const passwordsMatch = await bcrypt.compare(
+        data.password,
+        foundUser.password
+    )
 
-    if (match) {
-        let token = await getJWT({ id: user._id })
+    if (passwordsMatch) {
+        let token = await getJWT({ id: foundUser._id.toString() })
+        console.log(foundUser._id.toString())
         return {
             ok: true,
             data: token,
         }
     }
 
-    return { ok: false, data: 'invalid password' }
+    return { ok: false, data: 'Password Invalid.' }
 }
