@@ -7,7 +7,7 @@
     "type": "module",
     "main": "app.js",
     "scripts": {
-        "dev": "node app.js",
+        "dev": "nodemon app.js",
         "format": "npx prettier .. --write",
         "test": "vitest"
     },
@@ -20,7 +20,8 @@
         "express": "^4.21.2",
         "joi": "^17.13.3",
         "jose": "^6.0.10",
-        "mongoose": "^8.11.0"
+        "mongoose": "^8.11.0",
+        "nodemon": "^3.1.10"
     },
     "devDependencies": {
         "vitest": "^3.2.4"
