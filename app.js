@@ -12,6 +12,7 @@ import Joi from 'joi'
 
 import cors from 'cors'
 import { verifyJWT } from './lib/jwt.js'
+import getUserData from './routes/dashboard.js'
 app.use(
     cors({
         origin: true,
@@ -40,7 +41,12 @@ async function checkJWTCookie(req, res, next) {
     }
 
     try {
-        let { ok, data } = await verifyJWT(req.cookies.token)
+        let {
+            ok,
+            data: { payload, protectedHeader },
+        } = await verifyJWT(req.cookies.token)
+        req.jwtPayload = payload
+        req.jwtProtectedHeader = protectedHeader
 
         next()
     } catch (err) {
@@ -62,9 +68,24 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/dashboard', checkJWTCookie, (req, res) => {
+    console.log(req.jwtPayload)
+    console.log(req.jwtProtectedHeader)
+
+    let { ok, data } = getUserData(req.jwtPayload.id)
+    if (!ok) {
+        res.status(401).json({
+            ok: false,
+            data: {},
+            metadata: {
+                timestamp: Date.now(),
+                endpoint: req.path,
+            },
+        })
+    }
+
     res.status(200).json({
         ok: true,
-        data: {},
+        data: { user: data },
         metadata: {
             timestamp: Date.now(),
             endpoint: req.path,
