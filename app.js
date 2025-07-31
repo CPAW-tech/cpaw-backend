@@ -31,7 +31,10 @@ async function checkJWTCookie(req, res, next) {
         return res.status(401).json({
             ok: false,
             data: {
-                error: new Error('Unauthorized: No token provided.'),
+                error: {
+                    name: 'API_NO_COOKIE',
+                    message: 'No cookie provided.',
+                },
             },
             metadata: {
                 timestamp: Date.now(),
@@ -53,7 +56,10 @@ async function checkJWTCookie(req, res, next) {
         res.status(401).json({
             ok: false,
             data: {
-                error: new Error('Unauthorized: Invalid Cookie.'),
+                error: {
+                    name: 'API_INVALID_TOKEN',
+                    message: 'Token credentials invalid.',
+                },
             },
             metadata: {
                 timestamp: Date.now(),
@@ -67,15 +73,12 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-app.get('/api/dashboard', checkJWTCookie, (req, res) => {
-    console.log(req.jwtPayload)
-    console.log(req.jwtProtectedHeader)
-
-    let { ok, data } = getUserData(req.jwtPayload.id)
+app.get('/api/dashboard', checkJWTCookie, async (req, res) => {
+    let { ok, data } = await getUserData(req.jwtPayload.id, 'username')
     if (!ok) {
         res.status(401).json({
             ok: false,
-            data: {},
+            data: { error: data.error },
             metadata: {
                 timestamp: Date.now(),
                 endpoint: req.path,
@@ -85,7 +88,7 @@ app.get('/api/dashboard', checkJWTCookie, (req, res) => {
 
     res.status(200).json({
         ok: true,
-        data: { user: data },
+        data: data,
         metadata: {
             timestamp: Date.now(),
             endpoint: req.path,
@@ -119,7 +122,10 @@ app.post('/api/auth/signup', async (req, res) => {
         res.status(400).json({
             ok: false,
             data: {
-                error,
+                error: {
+                    name: 'AUTH_INVALID_FORM_DATA',
+                    message: 'Data provided does not meet requirements.',
+                },
             },
             metadata: {
                 timestamp: Date.now(),
@@ -152,7 +158,7 @@ app.post('/api/auth/signup', async (req, res) => {
         res.status(500).json({
             ok: false,
             data: {
-                error: data,
+                error: data.error,
             },
             metadata: {
                 timestamp: Date.now(),
@@ -180,7 +186,10 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(400).json({
             ok: false,
             data: {
-                error,
+                error: {
+                    name: 'AUTH_INVALID_FORM_DATA',
+                    message: 'Data provided does not meet requirements.',
+                },
             },
             metadata: {
                 timestamp: Date.now(),
@@ -212,9 +221,7 @@ app.post('/api/auth/login', async (req, res) => {
     } else {
         res.status(500).json({
             ok: false,
-            data: {
-                error: data,
-            },
+            data: { error: data.error },
             metadata: {
                 timestamp: Date.now(),
                 endpoint: req.path,

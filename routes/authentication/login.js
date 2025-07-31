@@ -9,7 +9,15 @@ export default async function login(data) {
 
     let foundUser = await User.findOne({ username: data.username }).exec()
     if (!foundUser) {
-        return { ok: false, data: 'Username not found.' }
+        return {
+            ok: false,
+            data: {
+                error: {
+                    name: 'AUTH_INVALID_USERNAME',
+                    message: 'Invalid username.',
+                },
+            },
+        }
     }
 
     const passwordsMatch = await bcrypt.compare(
@@ -26,5 +34,13 @@ export default async function login(data) {
         }
     }
 
-    return { ok: false, data: 'Password Invalid.' }
+    return {
+        ok: false,
+        data: {
+            error: {
+                name: 'AUTH_INVALID_PASSWORD',
+                message: 'Invalid password.',
+            },
+        },
+    }
 }

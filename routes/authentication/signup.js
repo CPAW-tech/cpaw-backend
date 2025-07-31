@@ -18,7 +18,12 @@ export default async function signup(data) {
     } catch (error) {
         return {
             ok: false,
-            data: error,
+            data: {
+                error: {
+                    name: 'DB_USER_NOT_FOUND',
+                    message: 'User could not be created.',
+                },
+            },
         }
     }
 }
