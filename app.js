@@ -30,11 +30,11 @@ async function checkJWTCookie(req, res, next) {
         return res.status(401).json({
             ok: false,
             data: {
-                error: 'Unauthorized: No token provided.',
+                error: new Error('Unauthorized: No token provided.'),
             },
             metadata: {
                 timestamp: Date.now(),
-                endpoint: 'authentication middleware',
+                endpoint: req.path,
             },
         })
     }
@@ -47,11 +47,11 @@ async function checkJWTCookie(req, res, next) {
         res.status(401).json({
             ok: false,
             data: {
-                error: new Error('Cookie Not Parsed Properly.'),
+                error: new Error('Unauthorized: Invalid Cookie.'),
             },
             metadata: {
                 timestamp: Date.now(),
-                endpoint: 'authentication middleware',
+                endpoint: req.path,
             },
         })
     }
@@ -67,7 +67,7 @@ app.get('/api/dashboard', checkJWTCookie, (req, res) => {
         data: {},
         metadata: {
             timestamp: Date.now(),
-            endpoint: '/api/dashboard',
+            endpoint: req.path,
         },
     })
 })
@@ -102,7 +102,7 @@ app.post('/api/auth/signup', async (req, res) => {
             },
             metadata: {
                 timestamp: Date.now(),
-                endpoint: '/api/auth/signup',
+                endpoint: req.path,
             },
         })
     }
@@ -124,7 +124,7 @@ app.post('/api/auth/signup', async (req, res) => {
                 data: {},
                 metadata: {
                     timestamp: Date.now(),
-                    endpoint: '/api/auth/signup',
+                    endpoint: req.path,
                 },
             })
     } else {
@@ -135,7 +135,7 @@ app.post('/api/auth/signup', async (req, res) => {
             },
             metadata: {
                 timestamp: Date.now(),
-                endpoint: '/api/auth/signup',
+                endpoint: req.path,
             },
         })
     }
@@ -185,7 +185,7 @@ app.post('/api/auth/login', async (req, res) => {
                 data: {},
                 metadata: {
                     timestamp: Date.now(),
-                    endpoint: '/api/auth/login',
+                    endpoint: req.path,
                 },
             })
     } else {
@@ -196,20 +196,9 @@ app.post('/api/auth/login', async (req, res) => {
             },
             metadata: {
                 timestamp: Date.now(),
-                endpoint: '/api/auth/login',
+                endpoint: req.path,
             },
         })
-    }
-})
-
-app.get('/api/auth/protected', async (req, res) => {
-    let {
-        ok,
-        data: { payload, protectedHeader },
-    } = await verifyJWT(req.cookies.token)
-
-    if (ok) {
-        console.log(payload.id)
     }
 })
 
