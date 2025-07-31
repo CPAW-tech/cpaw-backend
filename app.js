@@ -201,7 +201,7 @@ app.post('/api/auth/login', async (req, res) => {
     let { ok, data } = await login(user)
 
     let options = {
-        maxAge: 3600000, // 1 hr expiry matched with token timer
+        maxAge: 7200000, // 2 hr expiry matched with token timer
         httpOnly: true, // not exposed to client side code
         sameSite: 'none', // api and website should be on same origins but just in case
         secure: true, // force transfer via HTTPS
